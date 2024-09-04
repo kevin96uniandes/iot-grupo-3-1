@@ -729,19 +729,19 @@ class MeasurementStatsView(TemplateView):
                 print(f'Measurement name: {measurement.name}')
                 data_stats = Data.objects.filter(
                     station=station, measurement=measurement,
-                    time__gte=start_ts, time__lte=end_ts
+                    time__gte=from_date.date(), time__lte=to_date()
                 ).aggregate(
-                    Avg('avg_value'),
-                    Max('max_value'),
-                    Min('min_value'),
+                    Avg('value'),
+                    Max('value'),
+                    Min('value'),
                     Count('time')
                 )
                 print(f'Data stats: {data_stats}')
                 result["measurements"].append({
                     "type": measurement.name,
-                    "average": data_stats['avg_value__avg'],
-                    "max": data_stats['max_value__max'],
-                    "min": data_stats['min_value__min'],
+                    "average": data_stats['value__avg'],
+                    "max": data_stats['value__max'],
+                    "min": data_stats['value__min'],
                     "total_measurements": data_stats['time__count']
                 })
             print(f'Result 2: {result}')
