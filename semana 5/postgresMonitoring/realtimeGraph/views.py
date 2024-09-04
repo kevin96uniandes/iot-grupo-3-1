@@ -703,9 +703,6 @@ class MeasurementStatsView(TemplateView):
         to_date = datetime.fromtimestamp(float(to_ts) / 1000)
 
         print(f'From_date: {from_date}, To_date: {to_date}')
-        
-        start_ts = int(from_date.timestamp() * 1000000)
-        end_ts = int(to_date.timestamp() * 1000000)
 
         # Consulta la base de datos for la ubicación y estación relacionadas
         try:
@@ -715,8 +712,8 @@ class MeasurementStatsView(TemplateView):
             print(f'Station: {location}')
             measurements = Measurement.objects.filter(
                 data__station=station,
-                data__time__gte=start_ts,
-                data__time__lte=end_ts
+                data__time__gte=from_date.date(),
+                data__time__lte=to_date.date()
             ).distinct()
             print(f'Measurements: {measurements}')
 
