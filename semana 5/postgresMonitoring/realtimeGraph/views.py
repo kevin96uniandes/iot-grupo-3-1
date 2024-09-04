@@ -673,3 +673,84 @@ Filtro para formatear datos en los templates
 @ register.filter
 def add_str(str1, str2):
     return str1 + str2
+
+@method_decorator(csrf_exempt, name='dispatch')
+class MeasurementStatsView(TemplateView):
+    template_name = "stats.html"
+
+    """
+    Get de /stats. Se muestra por el momento una vista sin datos.
+    """
+    def get(self, request, **kwargs):
+        city_name = request.GET.get('city')
+        state_name = request.GET.get('state')
+        country_name = request.GET.get('country')
+        from_ts = request.GET.get('from')
+        to_ts = request.GET.get('to')
+        print(f'City: {city_name}, State: {state_name}, Country: {country_name}, From_timestamp: {from_ts}, To_timestamp: {to_ts}')
+        
+        #Valida si las fechas están presentes
+        if from_ts == None and to_ts == None:
+            from_ts = str((datetime.now() - dateutil.relativedelta.relativedelta(weeks=1)).timestamp())
+            to_ts = str((datetime.now() + dateutil.relativedelta.relativedelta(days=1)).timestamp())
+        elif to_ts == None:
+            to_ts = str(datetime.now().timestamp())
+        elif from_ts == None:
+            from_ts = str(datetime.fromtimestamp(0).timestamp())
+
+        # Convierte timestamps a datetime
+        from_date = datetime.fromtimestamp(float(from_ts) / 1000)
+        to_date = datetime.fromtimestamp(float(to_ts) / 1000)
+
+        print(f'From_date: {from_date}, To_date: {to_date}')
+        
+        start_ts = int(from_date.timestamp() * 1000000)
+        end_ts = int(to_date.timestamp() * 1000000)
+
+        # Consulta la base de datos for la ubicación y estación relacionadas
+        try:
+            location = Location.objects.get(city__name=city_name, state__name=state_name, country__name=country_name)
+            print(f'Location: {location}')
+            station = Station.objects.get(location=location)
+            print(f'Station: {location}')
+            measurements = Measurement.objects.filter(
+                data__station=station,
+                data__time__gte=start_ts,
+                data__time__lte=end_ts
+            ).distinct()
+            print(f'Measurements: {measurements}')
+
+            result = {
+                "location": f"{city_name}, {state_name}, {country_name}",
+                "from": from_ts,
+                "to": to_ts,
+                "measurements": []
+            }
+            print(f'Result: {result}')
+
+            for measurement in measurements:
+                print(f'Measurement name: {measurement.name}')
+                data_stats = Data.objects.filter(
+                    station=station, measurement=measurement,
+                    time__gte=start_ts, time__lte=end_ts
+                ).aggregate(
+                    Avg('avg_value'),
+                    Max('max_value'),
+                    Min('min_value'),
+                    Count('time')
+                )
+                print(f'Data stats: {data_stats}')
+                result["measurements"].append({
+                    "type": measurement.name,
+                    "average": data_stats['avg_value__avg'],
+                    "max": data_stats['max_value__max'],
+                    "min": data_stats['min_value__min'],
+                    "total_measurements": data_stats['time__count']
+                })
+            print(f'Result 2: {result}')
+            
+            return JsonResponse(result)
+        except Location.DoesNotExist:
+            return JsonResponse({"error": "Ubicacion no encontrada."}, status=404)
+        except Station.DoesNotExist:
+            return JsonResponse({"error": "Estacion no encontrada para esa ubicación."}, status=404)

@@ -1,0 +1,39 @@
+{% extends 'base.html' %} {% load static %} {% block head %}
+<script src="/static/lib/proj4.js"></script>
+<script src="/static/lib/highmaps/highmaps.js"></script>
+<script src="/static/lib/highmaps/highcharts-more.js"></script>
+<script src="/static/lib/highmaps/modules/data.js"></script>
+<script src="/static/lib/highmaps/modules/exporting.js"></script>
+<script src="/static/lib/highmaps/modules/offline-exporting.js"></script>
+<script src="/static/lib/highmaps/maps/co-all.js"></script>
+<script src="/static/lib/highmaps/maps/world.js"></script>
+{% endblock %} {% block content %}
+<br />
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="row">
+        <div class="col-md-6 col-12 my-3 my-md-0">
+          <label for="calendarPicker">Selecciona un rango de fechas</label>
+          <div id="calendarPicker">
+            <span onclick="openCalendar()">
+              {{start}}
+              - 
+              {{end}}
+            </span>
+            <button
+              type="button"
+              class="btn btn-light ml-1"
+              name="daterange"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calendar" viewBox="0 0 16 16">
+                <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
