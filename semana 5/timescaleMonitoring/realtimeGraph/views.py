@@ -787,18 +787,23 @@ class MeasurementStatsView(TemplateView):
         print(f'City: {city_name}, State: {state_name}, Country: {country_name}, From_timestamp: {from_ts}, To_timestamp: {to_ts}')
         
         # Convierte timestamps a datetime
-        from_date = datetime.datetime.fromtimestamp(int(from_ts) / 1000)
-        to_date = datetime.datetime.fromtimestamp(int(to_ts) / 1000)
+        from_date = datetime.fromtimestamp(float(from_ts) / 1000)
+        to_date = datetime.fromtimestamp(float(to_ts) / 1000)
+
+        print(f'From_date: {from_date}, To_date: {to_date}')
 
         # Consulta la base de datos for la ubicación y estación relacionadas
         try:
             location = Location.objects.get(city__name=city_name, state__name=state_name, country__name=country_name)
+            print(f'Location: {location}')
             station = Station.objects.get(location=location)
+            print(f'Station: {location}')
             measurements = Measurement.objects.filter(
                 data__station=station,
                 data__time__gte=from_date,
                 data__time__lte=to_date
             ).distinct()
+            print(f'Measurements: {measurements}')
 
             result = {
                 "location": f"{city_name}, {state_name}, {country_name}",
@@ -806,6 +811,7 @@ class MeasurementStatsView(TemplateView):
                 "to": to_ts,
                 "measurements": []
             }
+            print(f'Result: {result}')
 
             for measurement in measurements:
                 data_stats = Data.objects.filter(
@@ -817,6 +823,7 @@ class MeasurementStatsView(TemplateView):
                     Min('value'),
                     Count('id')
                 )
+                print(f'Data stats: {data_stats}')
                 result["measurements"].append({
                     "type": measurement.name,
                     "average": data_stats['value__avg'],
@@ -824,6 +831,7 @@ class MeasurementStatsView(TemplateView):
                     "min": data_stats['value__min'],
                     "total_measurements": data_stats['id__count']
                 })
+            print(f'Result 2: {result}')
             
             return JsonResponse(result)
         except Location.DoesNotExist:
