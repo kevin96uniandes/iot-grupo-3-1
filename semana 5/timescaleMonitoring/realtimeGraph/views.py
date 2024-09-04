@@ -786,11 +786,23 @@ class MeasurementStatsView(TemplateView):
         to_ts = request.GET.get('to')
         print(f'City: {city_name}, State: {state_name}, Country: {country_name}, From_timestamp: {from_ts}, To_timestamp: {to_ts}')
         
+        #Valida si las fechas están presentes
+        if from_ts == None and to_ts == None:
+            from_ts = str((datetime.now() - dateutil.relativedelta.relativedelta(weeks=1)).timestamp())
+            to_ts = str((datetime.now() + dateutil.relativedelta.relativedelta(days=1)).timestamp())
+        elif to_ts == None:
+            to_ts = str(datetime.now().timestamp())
+        elif from_ts == None:
+            from_ts = str(datetime.fromtimestamp(0).timestamp())
+
         # Convierte timestamps a datetime
         from_date = datetime.fromtimestamp(float(from_ts) / 1000)
         to_date = datetime.fromtimestamp(float(to_ts) / 1000)
 
         print(f'From_date: {from_date}, To_date: {to_date}')
+        
+        start_ts = int(from_date.timestamp() * 1000000)
+        end_ts = int(to_date.timestamp() * 1000000)
 
         # Consulta la base de datos for la ubicación y estación relacionadas
         try:
@@ -800,8 +812,8 @@ class MeasurementStatsView(TemplateView):
             print(f'Station: {location}')
             measurements = Measurement.objects.filter(
                 data__station=station,
-                data__time__gte=from_date,
-                data__time__lte=to_date
+                data__time__gte=start_ts,
+                data__time__lte=end_ts
             ).distinct()
             print(f'Measurements: {measurements}')
 
@@ -816,7 +828,7 @@ class MeasurementStatsView(TemplateView):
             for measurement in measurements:
                 data_stats = Data.objects.filter(
                     station=station, measurement=measurement,
-                    time__gte=from_date, time__lte=to_date
+                    time__gte=start_ts, time__lte=end_ts
                 ).aggregate(
                     Avg('value'),
                     Max('value'),
