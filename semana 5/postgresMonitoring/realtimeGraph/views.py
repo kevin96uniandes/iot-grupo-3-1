@@ -729,7 +729,7 @@ class MeasurementStatsView(TemplateView):
                 print(f'Measurement name: {measurement.name}')
                 data_stats = Data.objects.filter(
                     station=station, measurement=measurement,
-                    time__gte=from_date.date(), time__lte=to_date()
+                    time__gte=from_date.date(), time__lte=to_date.date()
                 ).aggregate(
                     Avg('value'),
                     Max('value'),
