@@ -826,6 +826,7 @@ class MeasurementStatsView(TemplateView):
             print(f'Result: {result}')
 
             for measurement in measurements:
+                print(f'Measurement name: {measurement.name}')
                 data_stats = Data.objects.filter(
                     station=station, measurement=measurement,
                     time__gte=start_ts, time__lte=end_ts
