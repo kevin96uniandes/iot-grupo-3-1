@@ -831,10 +831,10 @@ class MeasurementStatsView(TemplateView):
                     station=station, measurement=measurement,
                     time__gte=start_ts, time__lte=end_ts
                 ).aggregate(
-                    Avg('value'),
-                    Max('value'),
-                    Min('value'),
-                    Count('id')
+                    Avg('avg_value'),
+                    Max('max_value'),
+                    Min('min_value'),
+                    Count('time')
                 )
                 print(f'Data stats: {data_stats}')
                 result["measurements"].append({
