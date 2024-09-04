@@ -839,10 +839,10 @@ class MeasurementStatsView(TemplateView):
                 print(f'Data stats: {data_stats}')
                 result["measurements"].append({
                     "type": measurement.name,
-                    "average": data_stats['value__avg'],
-                    "max": data_stats['value__max'],
-                    "min": data_stats['value__min'],
-                    "total_measurements": data_stats['id__count']
+                    "average": data_stats['avg_value__avg'],
+                    "max": data_stats['max_value__max'],
+                    "min": data_stats['min_value__min'],
+                    "total_measurements": data_stats['time__count']
                 })
             print(f'Result 2: {result}')
             
